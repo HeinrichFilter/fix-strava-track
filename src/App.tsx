@@ -8,7 +8,8 @@ function App() {
   //   console.log("dropped");
   // }, []);
   const { acceptedFiles, getRootProps, getInputProps, isDragActive } = useDropzone(/*{ onDrop }*/);
-  const [xml, setXml] = useState<string>();
+  const [xml, setXml] = useState<HTMLElement>();
+  //const [, setXmlChanged] = useState({});
 
   const files = acceptedFiles.map((file) => (
     <li key={file.name}>
@@ -21,8 +22,14 @@ function App() {
     async function getFileText() {
       if (acceptedFiles.length < 1) return;
       const firstAccpetedFile = acceptedFiles[0];
-      setXml(await firstAccpetedFile.text());
+      const xml = await firstAccpetedFile.text();
+      let domparser = new DOMParser();
+      const xmlDoc = domparser.parseFromString(xml, "text/xml");
+      //.querySelectorAll("trkpt > time")
+      console.log(xmlDoc);
+      setXml(xmlDoc.documentElement);
     }
+
     getFileText();
   }, [acceptedFiles]);
 
@@ -40,7 +47,24 @@ function App() {
         <h4>Files</h4>
         <ul>{files}</ul>
       </aside>
-      <pre>{xml}</pre>
+      <pre>
+        {[...(xml?.querySelectorAll("trkpt") || ([] as any))].map((trkpt: Element, i) => (
+          <p key={i}>
+            {i} {trkpt.getAttribute("lat")}
+            <button
+              onClick={(e) => {
+                //if (trkpt === null) return;
+                trkpt.parentNode?.removeChild(trkpt);
+                //setXmlChanged({});
+                setXml(xml?.cloneNode(true) as HTMLScriptElement);
+                console.log(e);
+              }}
+            >
+              Delete
+            </button>
+          </p>
+        ))}
+      </pre>
     </div>
   );
 }
