@@ -1,6 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
 import { useDropzone } from "react-dropzone";
+import { Map, TileLayer, Marker, Popup } from "react-leaflet";
+import { LatLngTuple } from "leaflet";
 
 function App() {
   // const onDrop = useCallback((acceptedFiles) => {
@@ -10,6 +12,9 @@ function App() {
   const { acceptedFiles, getRootProps, getInputProps, isDragActive } = useDropzone(/*{ onDrop }*/);
   const [xml, setXml] = useState<HTMLElement>();
   //const [, setXmlChanged] = useState({});
+  const position: LatLngTuple = [51.505, -0.09];
+
+  const zoom = 13;
 
   const files = acceptedFiles.map((file) => (
     <li key={file.name}>
@@ -47,6 +52,17 @@ function App() {
         <h4>Files</h4>
         <ul>{files}</ul>
       </aside>
+      <Map center={position as LatLngTuple} zoom={zoom} style={{ height: "100%" }}>
+        <TileLayer
+          attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Marker position={position}>
+          <Popup>
+            A pretty CSS3 popup. <br /> Easily customizable.
+          </Popup>
+        </Marker>
+      </Map>
       <pre>
         {[...(xml?.querySelectorAll("trkpt") || ([] as any))].map((trkpt: Element, i) => (
           <p key={i}>
